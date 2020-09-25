@@ -53,11 +53,15 @@ void lidar_callback(const sensor_msgs::LaserScan::ConstPtr &msg){
   std::list<Line> lines;/*各線分を格納する*/
   int startIndex = 0;
   ConvexHull convexHull(msg,0,1);
+  
+  // 从 2 开始
   for(int i=2;i<msg->ranges.size()-1;i++){
+    // 凸包的 endid ++
     convexHull.add();
     width = convexHull.calcWidth();
     convexHull.leastSquaresMethod(&a,&b);
     
+    // 如果当前凸包宽度>阈值，说明加入了一个直线外的点，则之前的那些点属于同一个线段。
     if(width > DIS_THRESHOLD){
       lines.push_back(Line(startIndex,i-1,a,b,msg->ranges));
       startIndex = i;
